@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://localhost:7054/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://comparador-api-cf8z.onrender.com';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
