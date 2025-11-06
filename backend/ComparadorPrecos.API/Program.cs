@@ -34,11 +34,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowVercel", policy =>
     {
-        policy.WithOrigins(
-                "https://comparador-precos.vercel.app",
-                "https://*.vercel.app",
-                "http://localhost:3000"
-            )
+        policy.SetIsOriginAllowed(origin =>
+            origin.Contains("vercel.app") ||
+            origin.Contains("localhost:3000"))
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
