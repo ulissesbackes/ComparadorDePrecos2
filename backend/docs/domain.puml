@@ -1,0 +1,81 @@
+@startuml
+
+namespace ComparadorPrecos.Models {
+
+class Produto << (E,#007acc) Entity >> {
+  + {field} int Id <<PK>>
+  + {field} string Nome
+  + {field} string Marca <<nullable>>
+  + {field} decimal PrecoAtual
+  + {field} string Mercado
+  + {field} string Url
+  + {field} string UrlImagem <<nullable>>
+  + {field} DateTime CriadoEm
+  + {field} DateTime AtualizadoEm
+  --
+  + {collection} List<OpcaoCompra> OpcoesCompra
+}
+
+class ListaCompras << (E,#007acc) Entity >> {
+  + {field} int Id <<PK>>
+  + {field} string Nome
+  + {field} int UsuarioId <<FK>>
+  + {field} DateTime CriadaEm
+  --
+  + {collection} List<ItemDesejado> ItensDesejados
+}
+
+class ItemDesejado << (E,#007acc) Entity >> {
+  + {field} int Id <<PK>>
+  + {field} string Nome
+  + {field} string Descricao <<nullable>>
+  + {field} int UsuarioId <<FK>>
+  + {field} int ListaComprasId <<FK>>
+  + {field} DateTime CriadoEm
+  --
+  + {reference} ListaCompras ListaCompras
+  + {collection} List<OpcaoCompra> OpcoesCompra
+}
+
+class OpcaoCompra << (E,#007acc) Entity >> {
+  + {field} int Id <<PK>>
+  + {field} int ItemDesejadoId <<FK>>
+  + {field} int ProdutoId <<FK>>
+  + {field} string Descricao
+  + {field} DateTime CriadoEm
+  --
+  + {reference} ItemDesejado ItemDesejado
+  + {reference} Produto Produto
+}
+
+class Usuario << (E,#007acc) Entity >> {
+  + {field} int Id <<PK>>
+  + {field} string Nome
+  + {field} string Email
+  + {field} string SenhaHash
+  + {field} DateTime DataCadastro
+  --
+  + {collection} List<ListaCompras> ListasCompras
+  + {collection} List<ItemDesejado> ItensDesejados
+}
+
+' Relacionamentos
+Usuario ||--o{ ListaCompras
+Usuario ||--o{ ItemDesejado
+ListaCompras ||--o{ ItemDesejado
+ItemDesejado ||--o{ OpcaoCompra
+Produto ||--o{ OpcaoCompra
+
+note right of ItemDesejado
+  FK para ListaCompras no campo
+  ListaComprasId
+end note
+
+note right of OpcaoCompra
+  FKs para:
+  - ItemDesejado (ItemDesejadoId)
+  - Produto (ProdutoId)
+end note
+
+}
+@enduml
