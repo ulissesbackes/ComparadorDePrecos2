@@ -1,15 +1,25 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["ComparadorPrecos.API.csproj", "."]
-RUN dotnet restore "ComparadorPrecos.API.csproj"
-COPY . .
-RUN dotnet build "ComparadorPrecos.API.csproj" -c Release -o /app/build
 
-FROM build AS publish
-RUN dotnet publish "ComparadorPrecos.API.csproj" -c Release -o /app/publish
+# Copiar arquivos de projeto de todas as pastas
+COPY *.sln .
+COPY ComparadorPrecos.API/*.csproj ./ComparadorPrecos.API/
+COPY ComparadorPrecos.Application/*.csproj ./ComparadorPrecos.Application/
+COPY ComparadorPrecos.Core/*.csproj ./ComparadorPrecos.Core/
+COPY ComparadorPrecos.Infrastructure/*.csproj ./ComparadorPrecos.Infrastructure/
+
+# Restaurar dependências
+RUN dotnet restore
+
+# Copiar todo o código
+COPY . .
+
+# Build e publish do projeto API
+WORKDIR /src/ComparadorPrecos.API
+RUN dotnet publish -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 EXPOSE 80
 ENTRYPOINT ["dotnet", "ComparadorPrecos.API.dll"]
