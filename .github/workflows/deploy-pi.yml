@@ -6,59 +6,32 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ARM64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to Raspberry Pi
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PISERVER_HOST }}
-          username: ${{ secrets.PISERVER_USER }}
-          key: ${{ secrets.PISERVER_SSH_KEY }}
-          script_stop: true  # Para se algum comando falhar
-          script: |
-            set -e  # Sai imediatamente se algum comando falhar
-            set -x  # Mostra cada comando executado (modo debug)
-            
-            echo "Starting deployment to ${{ secrets.PISERVER_HOST }}..."
-            
-            # Navega para o diretório do projeto
-            cd ~/apps/comparador-precos || { echo "Directory not found"; exit 1; }
-            
-            # Atualiza o código
-            echo "Pulling latest code..."
-            git fetch origin
-            git reset --hard origin/main || { echo "Git pull failed"; exit 1; }
-            
-            # Para os containers atuais
-            echo "Stopping existing containers..."
-            docker compose down || true  # Continua mesmo se não houver containers
-            
-            # Constrói as imagens
-            echo "Building Docker images..."
-            docker compose build --no-cache --pull || { echo "Docker build failed"; exit 1; }
-            
-            # Inicia os containers
-            echo "Starting containers..."
-            docker compose up -d || { echo "Docker compose up failed"; exit 1; }
-            
-            # Aguarda os containers inicializarem
-            echo "Waiting for containers to start..."
-            sleep 10
-            
-            # Verifica se os containers estão rodando
-            echo "Checking running containers..."
-            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-            
-            # Verifica saúde dos containers
-            echo "Checking container health..."
-            for container in $(docker ps -q); do
-              container_name=$(docker inspect --format='{{.Name}}' $container | sed 's/\///')
-              echo "Container: $container_name"
-              docker inspect --format='{{.State.Health.Status}}' $container 2>/dev/null || echo "No health check"
-            done
-            
-            echo "Deploy completed successfully!"
-            echo "Application should be available soon..."
+      - name: Deploy Application
+        run: |
+          set -e
+          set -x
+          
+          echo "🚀 Starting deployment..."
+          cd ~/apps/comparador-precos
+          
+          echo "📥 Pulling latest code..."
+          git fetch origin
+          git reset --hard origin/main
+          
+          echo "🐳 Building and starting containers..."
+          docker compose down || true
+          docker compose build --no-cache --pull
+          docker compose up -d
+          
+          echo "⏳ Waiting for containers..."
+          sleep 10
+          
+          echo "📊 Running containers:"
+          docker ps
+          
+          echo "✅ Deploy completed!"
