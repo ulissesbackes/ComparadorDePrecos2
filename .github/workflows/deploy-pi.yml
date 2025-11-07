@@ -1,0 +1,29 @@
+name: Deploy to Raspberry Pi
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Raspberry Pi
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PISERVER_HOST }}
+          username: ${{ secrets.PISERVER_USER }}
+          key: ${{ secrets.PISERVER_SSH_KEY }}
+          script: |
+            echo "🚀 Starting deployment to ${{ secrets.PISERVER_HOST }}..."
+            cd ~/apps/comparador-precos
+            git pull origin main
+            docker compose down
+            docker compose build --no-cache
+            docker compose up -d
+            echo "✅ Deploy completed successfully!"
+            echo "📊 Running containers:"
+            docker ps
