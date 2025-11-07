@@ -17,11 +17,13 @@ jobs:
           set -x
           
           echo "🚀 Starting deployment..."
-          cd ~/apps/comparador-precos
           
-          echo "📥 Pulling latest code..."
-          git fetch origin
-          git reset --hard origin/main
+          # Copia o código para o diretório final
+          echo "📁 Copying code to deployment directory..."
+          mkdir -p /home/ulisses/apps/comparador-precos
+          cp -r . /home/ulisses/apps/comparador-precos/
+          
+          cd /home/ulisses/apps/comparador-precos
           
           echo "🐳 Building and starting containers..."
           docker compose down || true
