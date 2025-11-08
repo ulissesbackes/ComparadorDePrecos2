@@ -24,11 +24,18 @@ jobs:
           echo "📁 Setting up deployment directory..."
           mkdir -p $DEPLOY_DIR
           
-          # Copia apenas os arquivos do projeto, ignorando .git
-          echo "📦 Copying project files (excluding .git)..."
-          cp -r backend frontend nginx docker-compose.yml readme.md $DEPLOY_DIR/
+          # Lista arquivos disponíveis para debug
+          echo "📁 Files available in current directory:"
+          ls -la
+          
+          # Copia tudo exceto .git de forma segura
+          echo "📦 Copying all project files (excluding .git)..."
+          find . -maxdepth 1 -not -name '.' -not -name '.git' -exec cp -r {} $DEPLOY_DIR/ \; 2>/dev/null || true
           
           cd $DEPLOY_DIR
+          
+          echo "📁 Files copied to deployment directory:"
+          ls -la
           
           echo "🐳 Building and starting containers..."
           docker compose down || true
