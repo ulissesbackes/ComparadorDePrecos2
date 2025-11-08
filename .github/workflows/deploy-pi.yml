@@ -18,22 +18,27 @@ jobs:
           
           echo "🚀 Starting deployment..."
           
-          # Copia o código para o diretório final
-          echo "📁 Copying code to deployment directory..."
-          mkdir -p /home/ulisses/apps/comparador-precos
-          cp -r . /home/ulisses/apps/comparador-precos/
+          DEPLOY_DIR="/home/ulisses/apps/comparador-precos"
           
-          cd /home/ulisses/apps/comparador-precos
+          # Cria diretório
+          echo "📁 Setting up deployment directory..."
+          mkdir -p $DEPLOY_DIR
+          
+          # Copia apenas os arquivos do projeto, ignorando .git
+          echo "📦 Copying project files (excluding .git)..."
+          cp -r backend frontend nginx docker-compose.yml readme.md $DEPLOY_DIR/
+          
+          cd $DEPLOY_DIR
           
           echo "🐳 Building and starting containers..."
           docker compose down || true
-          docker compose build --no-cache --pull
+          docker compose build --no-cache
           docker compose up -d
           
-          echo "⏳ Waiting for containers..."
-          sleep 10
+          echo "⏳ Waiting for containers to start..."
+          sleep 15
           
-          echo "📊 Running containers:"
-          docker ps
+          echo "📊 Deployment status:"
+          docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
           
-          echo "✅ Deploy completed!"
+          echo "✅ Deploy completed successfully!"
