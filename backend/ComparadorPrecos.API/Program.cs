@@ -1,35 +1,37 @@
-using Microsoft.EntityFrameworkCore;
 using ComparadorPrecos.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-    {
-        Title = "Comparador de Preços API",
-        Version = "v1",
-        Description = "API para comparação de preços de produtos"
-    });
-});
+// Add CORS Vercel
+//builder.Services.AddControllers();
+//builder.Services.AddEndpointsApiExplorer();
+//builder.Services.AddSwaggerGen(c =>
+//{
+//    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+//    {
+//        Title = "Comparador de Preços API",
+//        Version = "v1",
+//        Description = "API para comparação de preços de produtos"
+//    });
+//});
 
 // Add DbContext with PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add CORS
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowAll", policy =>
-//    {
-//        policy.AllowAnyOrigin()
-//              .AllowAnyMethod()
-//              .AllowAnyHeader();
-//    });
-//});
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowVercel", policy =>
@@ -56,8 +58,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-//app.UseCors("AllowAll");
-app.UseCors("AllowVercel");
+app.UseCors("AllowAll");
+//app.UseCors("AllowVercel");
 app.UseAuthorization();
 app.MapControllers();
 
@@ -76,5 +78,10 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "An error occurred while migrating the database.");
     }
 }
+
+app.UseHttpMetrics();
+app.UseRouting();
+app.MapMetrics(); // Expõe endpoint /metrics
+
 
 app.Run();
