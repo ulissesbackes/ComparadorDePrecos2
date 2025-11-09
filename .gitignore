@@ -27,14 +27,17 @@ frontend/node_modules/
 tmp/
 temp/
 
-# Configurações sensíveis
+# Arquivos sensíveis
+.env
+.env.local
 *.env
-*.config
-appsettings.json
 
 # Logs
 *.log
-logs/
+
+# Diretórios de dados do Docker (se necessário)
+# data/
+# mysql/
 
 # Sistema
 .DS_Store

@@ -1,21 +1,33 @@
-FROM node:18-alpine
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copia arquivos de package
+# Copia apenas os arquivos de dependências primeiro (para melhor cache)
 COPY package*.json ./
 
-# Instala dependências
-RUN npm install
+# Instala dependências com cache otimizado para ARM
+RUN npm ci --silent --no-optional --prefer-offline
 
-# Copia o código fonte
+# Copia o restante do código
 COPY . .
 
-# Build da aplicação para produção (igual na Vercel)
+# Build com variáveis de otimização
+ENV NODE_ENV=production
+ENV GENERATE_SOURCEMAP=false
+ENv DISABLE_ESLINT_PLUGIN=true
+
 RUN npm run build
 
-# Instala servidor estático para servir o build
-RUN npm install -g serve
+# Imagem final mínima
+FROM node:18-alpine AS runner
+
+WORKDIR /app
+
+# Instala serve globalmente
+RUN npm install -g serve@14.2.1
+
+# Copia apenas os arquivos buildados
+COPY --from=builder /app/build ./build
 
 # Expõe a porta
 EXPOSE 3000
