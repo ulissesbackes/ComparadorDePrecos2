@@ -6,17 +6,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Add CORS Vercel
-//builder.Services.AddControllers();
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen(c =>
-//{
-//    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-//    {
-//        Title = "Comparador de Preços API",
-//        Version = "v1",
-//        Description = "API para comparação de preços de produtos"
-//    });
-//});
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "comparador de preços api",
+        Version = "v1",
+        Description = "api para comparação de preços de produtos"
+    });
+});
 
 // Add DbContext with PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
