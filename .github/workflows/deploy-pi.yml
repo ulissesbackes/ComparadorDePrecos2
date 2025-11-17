@@ -1,4 +1,4 @@
-name: Deploy to Raspberry Pi
+name: Deploy to Raspberry Pi Optimized
 
 on:
   push:
@@ -6,46 +6,29 @@ on:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Deploy Application
-        run: |
+    - name: Deploy to Raspberry Pi
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.RASPBERRY_PI_HOST }}
+        username: ${{ secrets.RASPBERRY_PI_USER }}
+        key: ${{ secrets.RASPBERRY_PI_SSH_KEY }}
+        script: |
           set -e
-          set -x
-          
-          echo "🚀 Starting deployment..."
+          echo "🚀 Starting optimized deployment..."
           
           DEPLOY_DIR="/home/ulisses/apps/comparador-precos"
-          
-          # Cria diretório
-          echo "📁 Setting up deployment directory..."
-          mkdir -p $DEPLOY_DIR
-          
-          # Lista arquivos disponíveis para debug
-          echo "📁 Files available in current directory:"
-          ls -la
-          
-          # Copia tudo exceto .git de forma segura
-          echo "📦 Copying all project files (excluding .git)..."
-          find . -maxdepth 1 -not -name '.' -not -name '.git' -exec cp -r {} $DEPLOY_DIR/ \; 2>/dev/null || true
-          
           cd $DEPLOY_DIR
           
-          echo "📁 Files copied to deployment directory:"
-          ls -la
+          echo "📦 Pulling latest code..."
+          git pull origin main
           
-          echo "🐳 Building and starting containers..."
-          docker compose down || true
-          docker compose build --no-cache
-          docker compose up -d
-          
-          echo "⏳ Waiting for containers to start..."
-          sleep 15
-          
-          echo "📊 Deployment status:"
-          docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          echo "🐳 Starting fast deploy..."
+          chmod +x deploy-fast.sh
+          ./deploy-fast.sh
           
           echo "✅ Deploy completed successfully!"
