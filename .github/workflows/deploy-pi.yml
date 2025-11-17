@@ -1,4 +1,4 @@
-name: Deploy to Raspberry Pi Optimized
+name: Deploy to Raspberry Pi
 
 on:
   push:
@@ -14,12 +14,14 @@ jobs:
     - name: Deploy to Raspberry Pi
       uses: appleboy/ssh-action@v0.1.10
       with:
-        host: ${{ secrets.RASPBERRY_PI_HOST }}
+        host: "2804:d57:4e2e:ee00:e65f:1ff:fe06:e765"
         username: ${{ secrets.RASPBERRY_PI_USER }}
         key: ${{ secrets.RASPBERRY_PI_SSH_KEY }}
+        port: 22
+        timeout: 120s
         script: |
           set -e
-          echo "🚀 Starting optimized deployment..."
+          echo "🚀 Starting deployment..."
           
           DEPLOY_DIR="/home/ulisses/apps/comparador-precos"
           cd $DEPLOY_DIR
