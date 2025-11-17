@@ -60,7 +60,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 //app.UseCors("AllowVercel");
-app.UseAuthorization();
+//app.UseAuthorization();
 app.MapControllers();
 
 // Apply migrations and create database
